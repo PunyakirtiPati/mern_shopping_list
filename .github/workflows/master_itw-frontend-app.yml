@@ -15,22 +15,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Node.js version
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20.x'
 
-      - name: npm install and build (from client folder)
+      - name: npm install and build
         run: |
           cd client
           npm install
           npm run build
-          cd ..
-      
-      - name: Zip build folder for deployment
-        run: zip -r release.zip client/build
 
-      - name: Upload artifact for deployment job
+      - name: Zip artifact for deployment
+        run: |
+          cd client
+          zip -r ../release.zip build
+
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: react-app
@@ -44,24 +45,24 @@ jobs:
       contents: read
 
     steps:
-      - name: Download artifact from build job
+      - name: Download artifact
         uses: actions/download-artifact@v4
         with:
           name: react-app
 
-      - name: Unzip artifact for deployment
+      - name: Unzip artifact
         run: unzip release.zip
 
-      - name: Login to Azure
+      - name: Azure Login
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_32C741789EB84BE9AEE67A99783750A2 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_8D24710CADDF46A9AB1E0185BD636307 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_3CE670B51B734B01956A025AB421619B }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_... }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_... }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_... }}
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'itw-frontend-app'
           slot-name: 'Production'
-          package: client/build
+          package: build
